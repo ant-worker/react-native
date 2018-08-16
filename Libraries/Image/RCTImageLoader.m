@@ -336,6 +336,9 @@ static UIImage *RCTResizeImageIfNeeded(UIImage *image,
 
     // Find suitable image URL loader
     id<RCTImageURLLoader> loadHandler = [self imageURLLoaderForURL:request.URL];
+    BOOL requiresScheduling = [loadHandler respondsToSelector:@selector(requiresScheduling)] ?
+    [loadHandler requiresScheduling] : YES;
+
     BOOL cacheResult = [loadHandler respondsToSelector:@selector(shouldCacheLoadedImages)] ?
     [loadHandler shouldCacheLoadedImages] : YES;
 
@@ -370,7 +373,7 @@ static UIImage *RCTResizeImageIfNeeded(UIImage *image,
                             progressHandler:progressHandler
                          partialLoadHandler:partialLoadHandler
                           completionHandler:^(NSError *error, UIImage *image){
-                              completionHandler(error, image, nil);
+                              completionHandler(error, image, nil, nil);
                           }];
     }
 
