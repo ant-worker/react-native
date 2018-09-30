@@ -30,7 +30,7 @@ static NSString *RCTCacheKeyForImage(NSString *imageTag, CGSize size, CGFloat sc
 {
   NSOperationQueue *_imageDecodeQueue;
   NSCache *_decodedImageCache;
-  NSMutableDictionary *_cacheStaleTimes;
+//  NSMutableDictionary *_cacheStaleTimes;
   NSDateFormatter *_headerDateFormatter;
 }
 
@@ -39,7 +39,7 @@ static NSString *RCTCacheKeyForImage(NSString *imageTag, CGSize size, CGFloat sc
   _decodedImageCache = [NSCache new];
   _decodedImageCache.totalCostLimit = 5 * 1024 * 1024; // 5MB
 
-  _cacheStaleTimes = [[NSMutableDictionary alloc] init];
+//  _cacheStaleTimes = [[NSMutableDictionary alloc] init];
 
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(clearCache)
@@ -61,9 +61,9 @@ static NSString *RCTCacheKeyForImage(NSString *imageTag, CGSize size, CGFloat sc
 - (void)clearCache
 {
   [_decodedImageCache removeAllObjects];
-  @synchronized(_cacheStaleTimes) {
-    [_cacheStaleTimes removeAllObjects];
-  }
+//  @synchronized(_cacheStaleTimes) {
+//    [_cacheStaleTimes removeAllObjects];
+//  }
 }
 
 - (void)addImageToCache:(UIImage *)image
@@ -86,17 +86,17 @@ static NSString *RCTCacheKeyForImage(NSString *imageTag, CGSize size, CGFloat sc
               resizeMode:(RCTResizeMode)resizeMode
 {
   NSString *cacheKey = RCTCacheKeyForImage(url, size, scale, resizeMode);
-  @synchronized(_cacheStaleTimes) {
-    id staleTime = _cacheStaleTimes[cacheKey];
-    if (staleTime) {
-      if ([[NSDate new] compare:(NSDate *)staleTime] == NSOrderedDescending) {
-        // cached image has expired, clear it out to make room for others
-        [_cacheStaleTimes removeObjectForKey:cacheKey];
-        [_decodedImageCache removeObjectForKey:cacheKey];
-        return nil;
-      }
-    }
-  }
+//  @synchronized(_cacheStaleTimes) {
+//    id staleTime = _cacheStaleTimes[cacheKey];
+//    if (staleTime) {
+//      if ([[NSDate new] compare:(NSDate *)staleTime] == NSOrderedDescending) {
+//        // cached image has expired, clear it out to make room for others
+//        [_cacheStaleTimes removeObjectForKey:cacheKey];
+//        [_decodedImageCache removeObjectForKey:cacheKey];
+//        return nil;
+//      }
+//    }
+//  }
   return [_decodedImageCache objectForKey:cacheKey];
 }
 
@@ -109,43 +109,47 @@ static NSString *RCTCacheKeyForImage(NSString *imageTag, CGSize size, CGFloat sc
            cacheControl:(NSString *)cacheControl
 {
   NSString *cacheKey = RCTCacheKeyForImage(url, size, scale, resizeMode);
-  BOOL shouldCache = YES;
-  NSDate *staleTime;
-  NSArray<NSString *> *components = [cacheControl componentsSeparatedByString:@","];
-  for (NSString *component in components) {
-    if ([component containsString:@"no-cache"] || [component containsString:@"no-store"] || [component hasSuffix:@"max-age=0"]) {
-      shouldCache = NO;
-      break;
-    } else {
-      NSRange range = [component rangeOfString:@"max-age="];
-      if (range.location != NSNotFound) {
-        NSInteger seconds = [[component substringFromIndex:range.location + range.length] integerValue];
-        NSDate *originalDate = [self dateWithHeaderString:responseDate];
-        staleTime = [originalDate dateByAddingTimeInterval:(NSTimeInterval)seconds];
-      }
-    }
-  }
-  if (shouldCache) {
-    if (staleTime) {
-      @synchronized(_cacheStaleTimes) {
-        _cacheStaleTimes[cacheKey] = staleTime;
-      }
-    }
+//  BOOL shouldCache = YES;
+//  NSDate *staleTime;
+//  NSArray<NSString *> *components = [cacheControl componentsSeparatedByString:@","];
+//  for (NSString *component in components) {
+//    if ([component containsString:@"no-cache"] || [component containsString:@"no-store"] || [component hasSuffix:@"max-age=0"]) {
+//      shouldCache = NO;
+//      break;
+//    } else {
+//      NSRange range = [component rangeOfString:@"max-age="];
+//      if (range.location != NSNotFound) {
+//        NSInteger seconds = [[component substringFromIndex:range.location + range.length] integerValue];
+//        NSDate *originalDate = [self dateWithHeaderString:responseDate];
+//        NSLog(@"zzzzzzzzzresponseDate1:%@",originalDate);
+//        staleTime = [originalDate dateByAddingTimeInterval:(NSTimeInterval)seconds];
+//
+//      }
+//    }
+//  }
+//  if (shouldCache) {
+//    if (staleTime) {
+//      @synchronized(_cacheStaleTimes) {
+//        _cacheStaleTimes[cacheKey] = staleTime;
+//      }
+//    }
+//    return [self addImageToCache:image forKey:cacheKey];
+//  }
     return [self addImageToCache:image forKey:cacheKey];
-  }
 }
 
 - (NSDate *)dateWithHeaderString:(NSString *)headerDateString {
   if (_headerDateFormatter == nil) {
     _headerDateFormatter = [[NSDateFormatter alloc] init];
-    // _headerDateFormatter.locale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
-    // _headerDateFormatter.dateFormat = @"EEE',' dd MMM yyyy HH':'mm':'ss 'GMT'";
-    // _headerDateFormatter.timeZone = [NSTimeZone timeZoneForSecondsFromGMT:0];
-    
-    NSLocale *locale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
-    [_headerDateFormatter setLocale:locale];
-    [_headerDateFormatter setDateFormat:@"EEE',' dd MMM yyyy HH':'mm':'ss 'GMT'"];
-    [_headerDateFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+    _headerDateFormatter.locale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"]; // en_US_POSIX
+//      NSLog(@"zzzzzzzzzformatter1:%@",staleTime);
+    _headerDateFormatter.dateFormat = @"EEE',' dd MMM yyyy HH':'mm':'ss 'GMT'";
+    _headerDateFormatter.timeZone = [NSTimeZone timeZoneForSecondsFromGMT:0];
+      
+//      NSLocale *locale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
+//      [_headerDateFormatter setLocale:locale];
+//      [_headerDateFormatter setDateFormat:@"EEE',' dd MMM yyyy HH':'mm':'ss 'GMT'"];
+//      [_headerDateFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
   }
 
   return [_headerDateFormatter dateFromString:headerDateString];
