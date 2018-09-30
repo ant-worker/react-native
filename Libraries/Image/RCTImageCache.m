@@ -138,9 +138,14 @@ static NSString *RCTCacheKeyForImage(NSString *imageTag, CGSize size, CGFloat sc
 - (NSDate *)dateWithHeaderString:(NSString *)headerDateString {
   if (_headerDateFormatter == nil) {
     _headerDateFormatter = [[NSDateFormatter alloc] init];
-    _headerDateFormatter.locale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
-    _headerDateFormatter.dateFormat = @"EEE',' dd MMM yyyy HH':'mm':'ss 'GMT'";
-    _headerDateFormatter.timeZone = [NSTimeZone timeZoneForSecondsFromGMT:0];
+    // _headerDateFormatter.locale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
+    // _headerDateFormatter.dateFormat = @"EEE',' dd MMM yyyy HH':'mm':'ss 'GMT'";
+    // _headerDateFormatter.timeZone = [NSTimeZone timeZoneForSecondsFromGMT:0];
+    
+    NSLocale *locale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
+    [_headerDateFormatter setLocale:locale];
+    [_headerDateFormatter setDateFormat:@"EEE',' dd MMM yyyy HH':'mm':'ss 'GMT'"];
+    [_headerDateFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
   }
 
   return [_headerDateFormatter dateFromString:headerDateString];
