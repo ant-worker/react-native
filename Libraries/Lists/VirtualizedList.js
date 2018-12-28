@@ -1645,10 +1645,12 @@ class CellRenderer extends React.Component<
       index,
       separators: this._separators,
     });
-    const onLayout =
-      getItemLayout && !parentProps.debug && !fillRateHelper.enabled()
-        ? undefined
-        : this.props.onLayout;
+    // const onLayout =
+    //   getItemLayout && !parentProps.debug && !fillRateHelper.enabled()
+    //     ? undefined
+    //     : this.props.onLayout;
+    // FOR: edit by zyl , render BUG https://github.com/facebook/react-native/issues/15734
+    const onLayout = this.props.onLayout;
     // NOTE: that when this is a sticky header, `onLayout` will get automatically extracted and
     // called explicitly by `ScrollViewStickyHeader`.
     const itemSeparator = ItemSeparatorComponent && (
