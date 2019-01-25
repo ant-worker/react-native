@@ -87,11 +87,34 @@ RCT_EXPORT_METHOD(saveToCameraRoll:(NSURLRequest *)request
                   resolve:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject)
 {
+  NSString *url = [[[request URL] absoluteString] stringByReplacingOccurrencesOfString:@"file:///private" withString:@""];
   if ([type isEqualToString:@"video"]) {
     // It's unclear if writeVideoAtPathToSavedPhotosAlbum is thread-safe
     dispatch_async(dispatch_get_main_queue(), ^{
       [self->_bridge.assetsLibrary writeVideoAtPathToSavedPhotosAlbum:request.URL completionBlock:^(NSURL *assetURL, NSError *saveError) {
         if (saveError) {
+          reject(kErrorUnableToSave, nil, saveError);
+        } else {
+          resolve(assetURL.absoluteString);
+        }
+      }];
+    });
+  } else if ([url hasSuffix:@".gif"]) {
+    NSError *error;
+    NSData *gifData;
+    if([url hasPrefix:@"http://"] || [url hasPrefix:@"https://"]){
+      gifData = [NSData dataWithContentsOfURL:[NSURL URLWithString:url] options:NSDataReadingUncached error:&error];
+    }else{
+      gifData = [NSData dataWithContentsOfFile:url options:NSDataReadingUncached error:&error];
+    }
+    if (error) {
+      reject(kErrorUnableToLoad, nil, error);
+      return;
+    }
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self->_bridge.assetsLibrary writeImageDataToSavedPhotosAlbum:gifData metadata:nil completionBlock:^(NSURL *assetURL, NSError *saveError) {
+        if (saveError) {
+          RCTLogWarn(@"Error saving cropped image: %@", saveError);
           reject(kErrorUnableToSave, nil, saveError);
         } else {
           resolve(assetURL.absoluteString);
