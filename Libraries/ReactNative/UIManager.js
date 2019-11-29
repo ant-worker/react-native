@@ -37,6 +37,10 @@ UIManager.takeSnapshot = function() {
   );
 };
 
+UIManager.getViewManagerConfig = function(viewManagerName: string) {
+  return UIManager[viewManagerName];
+};
+
 /**
  * Copies the ViewManager constants and commands into UIManager. This is
  * only needed for iOS, which puts the constants in the ViewManager
